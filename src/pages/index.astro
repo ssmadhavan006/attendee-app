@@ -9,74 +9,82 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <Base title="Home">
-  <!-- Hero Section -->
   <div class="col-12">
-    <div class="p-suru p-suru--25-75" style="border-radius: 4px; padding: 2.5rem 2rem; margin-bottom: 2rem;">
-      <div class="row u-no-padding">
-        <div class="col-8">
-          <h1 class="p-heading--1" style="color: #ffffff;">UbuCon India 2026</h1>
-          <p class="p-heading--4" style="color: #2C001E;">
-            Your official guide and companion app for the premier Ubuntu gathering in Bengaluru. Everything you need, right in your pocket.
-          </p>
-          <ul class="p-inline-list" style="margin-top: 1.5rem; margin-bottom: 0;">
-            <li class="p-inline-list__item">
-              <a href={`${base}schedule`} class="p-button" style="background-color: #2C001E; border-color: #2C001E; color: white;">View Schedule</a>
-            </li>
-            <li class="p-inline-list__item">
-              <a href={`${base}ticket`} class="p-button" style="background-color: transparent; border-color: #2C001E; color: #2C001E;">My Ticket</a>
-            </li>
-          </ul>
-        </div>
-      </div>
+    <h1 style="font-weight: 800;">Welcome to UbuCon India 2026</h1>
+    <p>
+      Your official guide and companion app for the premier Ubuntu community
+      gathering in Bengaluru. Everything you need, right in your pocket.
+    </p>
+  </div>
+
+  <div class="col-12">
+    <div class="u-sv2">
+      <a href={`${base}schedule`} class="p-button--positive">View Schedule</a>
+      <a href={`${base}ticket`} class="p-button">My Ticket</a>
+      <a href={`${base}venue`} class="p-button">Venue</a>
     </div>
   </div>
 
-  <!-- App Guide / Features -->
-  <div class="col-12">
-    <h2 class="p-heading--3">How to use this app</h2>
+  <div class="col-12" style="margin-top: 1rem;">
+    <h2 class="p-heading--4" style="font-weight: 700;">How to use this app</h2>
   </div>
 
   <div class="col-4">
-    <div class="p-card--highlighted">
+    <div class="p-card">
       <h3 class="p-heading--4">Plan Your Day</h3>
-      <p>Browse the full schedule of talks, workshops, and lightning rounds. Bookmark your favorite sessions so you don't miss anything.</p>
-      <a href={`${base}schedule`}>Go to schedule &rsaquo;</a>
+      <p>
+        Browse the full schedule of talks, workshops, and lightning rounds.
+        Bookmark your favorite sessions so you don't miss anything.
+      </p>
+      <p><a href={`${base}schedule`}>Go to schedule &rsaquo;</a></p>
     </div>
   </div>
 
   <div class="col-4">
-    <div class="p-card--highlighted">
+    <div class="p-card">
       <h3 class="p-heading--4">Fast Check-in</h3>
-      <p>Access your ticket QR code instantly. Show it at the registration desk for a seamless badge pickup experience.</p>
-      <a href={`${base}ticket`}>View ticket &rsaquo;</a>
+      <p>
+        Access your ticket QR code instantly. Show it at the registration desk
+        for a seamless badge pickup experience.
+      </p>
+      <p><a href={`${base}ticket`}>View ticket &rsaquo;</a></p>
     </div>
   </div>
 
   <div class="col-4">
-    <div class="p-card--highlighted">
+    <div class="p-card">
       <h3 class="p-heading--4">Find Your Way</h3>
-      <p>Lost? Check the venue maps to find rooms, food stalls, restrooms, and sponsor booths at BMS College of Engineering.</p>
-      <a href={`${base}venue`}>Get directions &rsaquo;</a>
+      <p>
+        Find your way to BMS College of Engineering with directions by metro,
+        bus, train, or flight.
+      </p>
+      <p><a href={`${base}venue`}>Get directions &rsaquo;</a></p>
     </div>
   </div>
 
-  <!-- Quick Links / Dashboard -->
-  <div class="col-8" style="margin-top: 2rem;">
+  <div class="col-8" style="margin-top: 1rem;">
     <div class="p-card">
       <h3 class="p-heading--4">Event Dashboard</h3>
-      <p class="p-text--small">Stay tuned during the event!</p>
+      <p class="u-text--muted">14 &ndash; 15 November 2026 &bull; BMS College of Engineering, Bengaluru</p>
       <hr />
-      <h4>Live Updates</h4>
-      <p>Once the event starts on Nov 14th, this section will automatically update to show you the <strong>Next Upcoming Session</strong> so you always know where to be.</p>
+      <h4 class="p-heading--5">Live Updates</h4>
+      <p>
+        During the event, check the schedule tab for live session timings,
+        room locations, and your saved bookmarks.
+      </p>
     </div>
   </div>
 
-  <div class="col-4" style="margin-top: 2rem;">
+  <div class="col-4" style="margin-top: 1rem;">
     <div class="p-card">
       <h3 class="p-heading--4">Important Links</h3>
       <ul class="p-list">
-        <li class="p-list__item"><a href="https://t.me/ubuconindia" target="_blank" rel="noopener noreferrer">Join Telegram Group</a></li>
-        <li class="p-list__item"><a href="https://in.ubucon.org" target="_blank" rel="noopener noreferrer">Official Website</a></li>
+        <li class="p-list__item">
+          <a href="https://t.me/ubuconindia" target="_blank" rel="noopener noreferrer">Join Telegram Group</a>
+        </li>
+        <li class="p-list__item">
+          <a href="https://in.ubucon.org" target="_blank" rel="noopener noreferrer">Official Website</a>
+        </li>
       </ul>
     </div>
   </div>
