@@ -19,6 +19,20 @@
   let isStandalone = $state(false);
   let qrSvg = $derived(ticket ? buildQrSvg(ticket, logoSvg) : '');
 
+  function cleanField(val: unknown): string {
+    if (typeof val !== 'string') return '';
+    const trimmed = val.trim();
+    if (/^(n\/?a|none|-)$/i.test(trimmed)) return '';
+    return trimmed;
+  }
+
+  let designation = $derived(cleanField(ticket?.attendee.designation));
+  let organisation = $derived(cleanField(ticket?.attendee.organisation));
+  let roleAndOrg = $derived.by(() => {
+    if (designation && organisation) return `${designation} at ${organisation}`;
+    return designation || organisation || '';
+  });
+
   onMount(async () => {
     isStandalone = window.matchMedia('(display-mode: standalone)').matches
       || (navigator as Navigator & { standalone?: boolean }).standalone === true;
@@ -50,7 +64,7 @@
       dotType: 'classy',
       corners: { topLeft: eye, topRight: eye, bottomLeft: eye },
       logo: logo
-        ? { svg: logo, size: 0.22, margin: 4}
+        ? { svg: logo, size: 0.22, margin: 4 }
         : undefined,
       ariaLabel: 'Ticket QR code',
     });
@@ -67,36 +81,61 @@
     <i class="p-icon--spinner u-animation--spin" style="font-size: 2rem;"></i>
   </div>
 {:else if ticket}
-  <div class="p-card--highlighted">
-    <div class="p-card__inner u-align-text--center">
-      <div class="u-sv2">{@html qrSvg}</div>
+  <div class="p-card--highlighted" style="max-width: 440px; margin: 0 auto;">
+    <div class="p-card__inner u-align-text--center" style="padding: 1.5rem 1rem;">
+      <div class="u-sv1" style="display: flex; justify-content: center; align-items: center;">
+        {@html qrSvg}
+      </div>
 
-      <h1 class="p-heading--3 u-no-margin--bottom">{ticket.attendee.name}</h1>
-      <p class="p-heading--5 u-text--muted">{ticket.attendee.ticketName || 'Attendee Pass'}</p>
-      {#if ticket.attendee.designation || ticket.attendee.organisation}
-        <p class="u-text--muted">
-          {ticket.attendee.designation || ''}{#if ticket.attendee.designation && ticket.attendee.organisation}{' at '}{/if}{ticket.attendee.organisation || ''}
-        </p>
-      {/if}
+      <div style="margin-top: 1rem;">
+        <h1 class="p-heading--2" style="margin-bottom: 0.35rem; font-weight: 700; word-break: break-word;">
+          {ticket.attendee.name}
+        </h1>
+
+        <div style="margin-bottom: 0.5rem;">
+          <span class="p-chip" style="margin: 0;">
+            <span class="p-chip__value" style="font-weight: 600; text-transform: uppercase; font-size: 0.8125rem; letter-spacing: 0.05em; color: #772953;">
+              {ticket.attendee.ticketName || 'Attendee Pass'}
+            </span>
+          </span>
+        </div>
+
+        {#if roleAndOrg}
+          <p class="u-text--muted u-no-margin--bottom" style="font-size: 0.9375rem;">
+            {roleAndOrg}
+          </p>
+        {/if}
+      </div>
 
       {#if phase === 'view'}
-        <p class="u-sv2">
-          <button class="p-button--positive has-icon" type="button" onclick={() => window.location.assign(`${base}ticket/add`)}
-            aria-label="Replace ticket" title="Replace ticket">
+        <div class="u-sv2" style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
+          <button
+            class="p-button--positive has-icon"
+            type="button"
+            onclick={() => window.location.assign(`${base}ticket/add`)}
+            aria-label="Replace ticket"
+            title="Replace ticket"
+          >
             <i class="p-icon--edit is-dark"></i>
             <span>Replace</span>
           </button>
-          <button class="p-button--negative has-icon" type="button" onclick={() => phase = 'confirmRemove'}
-            aria-label="Remove ticket" title="Remove ticket">
+          <button
+            class="p-button--negative has-icon"
+            type="button"
+            onclick={() => (phase = 'confirmRemove')}
+            aria-label="Remove ticket"
+            title="Remove ticket"
+          >
             <i class="p-icon--delete is-dark"></i>
+            <span>Remove</span>
           </button>
-        </p>
+        </div>
       {/if}
     </div>
   </div>
 
   {#if !isStandalone}
-    <div class="p-notification--information">
+    <div class="p-notification--information" style="max-width: 440px; margin: 1.5rem auto 0;">
       <div class="p-notification__content">
         <h2 class="p-notification__title">Quick access from your Home Screen</h2>
         <p class="p-notification__message">
