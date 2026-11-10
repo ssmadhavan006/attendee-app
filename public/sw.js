@@ -5,70 +5,73 @@
  * immediate load times while keeping content fresh in the background.
  * Essential for providing a robust offline experience in low-connectivity areas.
  */
-const CACHE_NAME = 'ubucon-india-2026-v2';
+const CACHE_NAME = 'ubucon-india-2026-v3';
+const BASE = '/attendee/';
 
 // Core assets to pre-cache immediately upon SW installation.
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
+  BASE,
+  `${BASE}index.html`,
+  `${BASE}manifest.webmanifest`,
+  `${BASE}favicon.svg`,
+  `${BASE}ashoke-chakra-cof.svg`,
+  `${BASE}ticket/`,
+  `${BASE}schedule/`,
+  `${BASE}venue/`,
 ];
 
 // Install Event: Precaches essential shell assets.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Pre-caching core assets');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    (async () => {
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.addAll(ASSETS_TO_CACHE);
+      } catch (err) {
+        console.warn('[ServiceWorker] Some assets failed to precache:', err);
+      }
+    })()
   );
-  // Force the waiting service worker to become the active service worker.
   self.skipWaiting();
 });
 
-// Activate Event: Clears out old caches when a new version of the SW takes over.
+// Activate Event: Clears out old caches when a new version takes over.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[ServiceWorker] Purging old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    })
+      await self.clients.claim();
+    })()
   );
-  // Ensure the SW takes control of all clients immediately.
-  self.clients.claim();
 });
 
-// Fetch Event
+// Fetch Event: Stale-While-Revalidate with Cache-First fallback.
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+  if (!event.request.url.startsWith('http')) return;
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Cache hit - return response
-      if (response) {
-        return response;
-      }
-      return fetch(event.request).then((response) => {
-        // Check if we received a valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
+    (async () => {
+      const cachedResponse = await caches.match(event.request);
+      const networkFetch = fetch(event.request)
+        .then(async (networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(event.request, clone);
+          }
+          return networkResponse;
+        })
+        .catch(() => cachedResponse);
 
-        // Clone the response
-        let responseToCache = response.clone();
-
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
-        return response;
-      });
-    }).catch(() => {
-      // Fallback for offline if not in cache (e.g., return offline page)
-    })
+      return cachedResponse || networkFetch;
+    })()
   );
 });
