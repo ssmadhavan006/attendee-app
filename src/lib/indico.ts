@@ -36,13 +36,14 @@ function speakerName(s: Record<string, unknown>): string {
  * Fetches contributions from the Indico export API and normalises them.
  */
 export async function fetchSchedule(eventId: number): Promise<IndicoSession[]> {
-  const url = `/api/schedule`;
+  const base = import.meta.env.BASE_URL || '/';
+  const url = `${base.replace(/\/+$/, '')}/api/schedule`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
     let message = `Failed to fetch schedule from Indico (HTTP ${res.status})`;
     try {
-      const body = await res.json() as { error?: string };
+      const body = (await res.json()) as { error?: string };
       if (body.error) message = body.error;
     } catch {
       // ignore malformed error body and keep the generic HTTP message
@@ -50,7 +51,7 @@ export async function fetchSchedule(eventId: number): Promise<IndicoSession[]> {
     throw new Error(message);
   }
 
-  const json = await res.json() as Record<string, unknown>;
+  const json = (await res.json()) as Record<string, unknown>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const contribs: any[] = (json?.results as any[])?.[0]?.contributions ?? [];
@@ -69,9 +70,12 @@ export async function fetchSchedule(eventId: number): Promise<IndicoSession[]> {
       title: String(c.title ?? '').trim(),
       speakers: speakerList.map(speakerName).filter(Boolean),
       track: typeof c.track === 'string' && c.track ? c.track : undefined,
-      room: (typeof c.roomFullname === 'string' && c.roomFullname)
-        ? c.roomFullname
-        : (typeof c.room === 'string' && c.room ? c.room : undefined),
+      room:
+        typeof c.roomFullname === 'string' && c.roomFullname
+          ? c.roomFullname
+          : typeof c.room === 'string' && c.room
+            ? c.room
+            : undefined,
       start,
       end,
       indicoUrl: typeof c.url === 'string' && c.url ? c.url : fallbackUrl,

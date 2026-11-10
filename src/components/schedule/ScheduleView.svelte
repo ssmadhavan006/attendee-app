@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { scheduleStore } from '../../lib/schedule.svelte.js';
+  import { scheduleStore, bookmarksStore } from '../../lib/schedule.svelte.js';
   import { formatDateLabel } from '../../lib/indico.js';
   import { EVENT_CONFIG } from '../../config.js';
   import ScheduleDay from './ScheduleDay.svelte';
@@ -8,9 +8,11 @@
 
   $effect(() => {
     scheduleStore.load();
+    bookmarksStore.init();
   });
 
   let activeDay = $state<string | null>(null);
+  let filterBookmarksOnly = $state(false);
 
   $effect(() => {
     if (
@@ -23,6 +25,17 @@
   });
 
   const dayKeys = $derived([...scheduleStore.sessionsByDay.keys()]);
+  const currentDaySessions = $derived(
+    activeDay ? (scheduleStore.sessionsByDay.get(activeDay) ?? []) : []
+  );
+  const displayedSessions = $derived(
+    filterBookmarksOnly
+      ? currentDaySessions.filter((s) => bookmarksStore.has(s.id))
+      : currentDaySessions
+  );
+  const bookmarkedCount = $derived(
+    currentDaySessions.filter((s) => bookmarksStore.has(s.id)).length
+  );
 
   function handleTabKeydown(event: KeyboardEvent, day: string): void {
     const idx = dayKeys.indexOf(day);
@@ -126,8 +139,29 @@
       role="tabpanel"
       aria-labelledby={`schedule-tab-${activeDay}`}
     >
-      <p><strong>{formatDateLabel(activeDay)}</strong></p>
-      <ScheduleDay sessions={scheduleStore.sessionsByDay.get(activeDay)!} />
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0;">
+        <p class="u-no-margin--bottom"><strong>{formatDateLabel(activeDay)}</strong></p>
+        <div>
+          <button
+            type="button"
+            class="p-button--base"
+            style="font-size: 0.875rem; padding: 0.25rem 0.75rem; border: 1px solid {filterBookmarksOnly ? '#E95420' : '#d9d9d9'}; background: {filterBookmarksOnly ? '#E95420' : 'transparent'}; color: {filterBookmarksOnly ? '#ffffff' : 'inherit'}; border-radius: 4px; cursor: pointer;"
+            onclick={() => { filterBookmarksOnly = !filterBookmarksOnly; }}
+            aria-pressed={filterBookmarksOnly}
+          >
+            ★ My Bookmarks {bookmarkedCount > 0 ? `(${bookmarkedCount})` : ''}
+          </button>
+        </div>
+      </div>
+
+      {#if displayedSessions.length === 0}
+        <div class="u-align--center" style="padding: 2.5rem 1rem;">
+          <p class="u-text--muted">No bookmarked sessions for this day.</p>
+          <p class="p-text--small">Tap the star icon on any session to bookmark it.</p>
+        </div>
+      {:else}
+        <ScheduleDay sessions={displayedSessions} />
+      {/if}
     </div>
   {/if}
 {/if}
