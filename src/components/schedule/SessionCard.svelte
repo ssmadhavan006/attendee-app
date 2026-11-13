@@ -8,39 +8,32 @@
   }
 
   const { session }: Props = $props();
-  let isBookmarked = $derived(bookmarksStore.has(session.id));
-
-  function toggleBookmark(e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    bookmarksStore.toggle(session.id);
-  }
+  const isBookmarked = $derived(bookmarksStore.has(session.id));
 </script>
 
-<div class="p-card p-card--highlighted" style="display: block; margin-bottom: 1rem; position: relative;">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-    <p class="u-no-margin--bottom">
-      <small>
-        {formatTimeIST(session.start)}&nbsp;&ndash;&nbsp;{formatTimeIST(session.end)}
-      </small>
-    </p>
+<div class={session.isBreak ? 'p-card' : 'p-card p-card--highlighted'}>
+  {#if !session.isBreak}
     <button
       type="button"
-      style="padding: 0.2rem 0.5rem; border: none; background: transparent; cursor: pointer; font-size: 1.25rem; line-height: 1; color: {isBookmarked ? '#E95420' : '#888888'};"
-      aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark session'}
-      title={isBookmarked ? 'Remove bookmark' : 'Bookmark session'}
-      onclick={toggleBookmark}
+      class="p-button--base u-float-right u-no-margin--bottom"
+      aria-label={`${isBookmarked ? 'Remove bookmark for' : 'Bookmark'} ${session.title}`}
+      aria-pressed={isBookmarked}
+      onclick={() => bookmarksStore.toggle(session.id)}
     >
-      {isBookmarked ? '★' : '☆'}
+      <span class="p-heading--3 u-no-margin" aria-hidden="true">{isBookmarked ? '★' : '☆'}</span>
     </button>
-  </div>
+  {/if}
+  <p class="u-no-margin--bottom">
+    <small>
+      {formatTimeIST(session.start)}&nbsp;&ndash;&nbsp;{formatTimeIST(session.end)}
+    </small>
+  </p>
 
-  <h3 class="p-heading--5 u-no-margin--top" style="margin-bottom: 0.5rem;">
+  <h3 class="p-heading--5 u-no-margin--top">
     <a
       href={session.indicoUrl}
       target="_blank"
       rel="noopener noreferrer"
-      style="color: inherit; text-decoration: none;"
     >
       {session.title}
     </a>
@@ -53,15 +46,16 @@
   {/if}
 
   {#if session.room || session.track}
-    <div class="u-sv1" style="margin-top: 0.5rem;">
+    <div class="u-sv1">
       {#if session.room}
         <span class="p-chip">
-          <span class="p-chip__label">{session.room}</span>
+          <span class="p-chip__lead">Room</span>
+          <span class="p-chip__value">{session.room}</span>
         </span>
       {/if}
       {#if session.track}
-        <span class="p-chip">
-          <span class="p-chip__label">{session.track}</span>
+        <span class="p-chip--information">
+          <span class="p-chip__value">{session.track}</span>
         </span>
       {/if}
     </div>
